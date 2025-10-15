@@ -8,11 +8,16 @@ metadata:
   name: haproxy
 spec:
   containers:
-  - image: haproxytech/haproxy-alpine:3.0
+  - image: haproxytech/haproxy-alpine:3.0 # Using a specific version
     name: haproxy 
     ports:
       - containerPort: 80
+        name: http
       - containerPort: 443
+        name: https
+    volumeMounts:
+      - name: haproxy-config
+        mountPath: /usr/local/etc/haproxy
     resources: 
       limits:
         cpu: "1"
@@ -22,3 +27,7 @@ spec:
         memory: "128Mi"
   dnsPolicy: ClusterFirst
   restartPolicy: Always
+  volumes:
+  - name: haproxy-config
+    emptyDir:
+      sizeLimit: 256Mi
