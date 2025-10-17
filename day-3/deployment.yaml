@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deployment
+    type: balancer
+  name: nginx-deployment
+  namespace: giropops
+spec:
+  replicas: 20
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: nginx-deployment
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template: # template do pod, o rollback somente atua nessa parte do deployment
+    metadata:
+      labels:
+        app: nginx-deployment
+    spec:
+      containers:
+      - image: nginx:1.16.0
+        name: nginx
+        resources:
+          limits:
+            cpu: 0.7
+            memory: 256Mi
+          requests:
+            cpu: 0.5
+            memory: 64Mi
