@@ -1,0 +1,36 @@
+apiVersion: apps/v1 # Versão da API do Kubernetes do objeto
+kind: DaemonSet # Tipo do objeto
+metadata: # Informações sobre o objeto
+  labels:
+    app: node-exporter-daemonset
+  name: node-exporter-daemonset # Nome do objeto
+spec: # Especificação do objeto
+  selector: # Seletor do objeto
+    matchLabels: # Labels que serão utilizadas para selecionar os Pods
+      app: node-exporter-daemonset # Label que será utilizada para selecionar o Pod
+  template: # Template do objeto
+    metadata: # Informações sobre o template do objeto
+      labels: # Labels que serão adicionadas aos Pods
+        app: node-exporter-daemonset # Label que será adicionada ao Pod
+    spec: # Especificação do objeto, neste caso, do Pod
+      hostNetwork: true # para utilizar a rede do próprio node/host e não do cluster kubernetes
+      containers: # Lista de containeres que serão executados no Pod
+      - name: node-exporter # Nome do container
+        image: prom/node-exporter:latest # Imagem do container
+        ports: # Lista de portas que serão expostas no container
+        - containerPort: 9100 
+          hostPort: 9100
+        volumeMounts: # Lista de volumes que serão montados no container, pois o node-exporter precisa de acesso ao /proc e /sys
+        - name: proc
+          mountPath: /host/proc
+          readOnly: true
+        - name: sys
+          mountPath: /host/sys
+          readOnly: true
+      volumes: # Lista de volumes de serão utilizadas no Pod
+        - name: proc
+          hostPath: # volume que vai transformar um diretório em um volume
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys

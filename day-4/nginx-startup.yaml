@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-startup
+  name: nginx-deployment-startup
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-startup
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: nginx-startup
+    spec:
+      containers:
+      - image: nginx:1.19.2
+        name: nginx
+        resources:
+          limits:
+            cpu: 0.5
+            memory: 256Mi
+          requests:
+            cpu: 0.25
+            memory: 128Mi
+        livenessProbe: # Início da configuração do livenessProbe, uma probe que garante que o POD estará liveness
+          # tcpSocket: # Tipo do teste que será realizado no container
+          httpGet:
+            path: /
+            port: 80 # Porta que será realizada a verificação pela Probe
+          initialDelaySeconds: 10 # Quandos segundos para aguardar o início das verificações após o start do Pod
+          periodSeconds: 10 # A cada quantos segundos será executado a verificação
+          timeoutSeconds: 5 # Quandos segundos para ocorrer um timeout na porta definida para verificação
+          failureThreshold: 3 # Quantas falhas consecutivas como limite/limiar/trigger para a Probe considerar o Pod como não saudável
+        readinessProbe:
+          exec:
+            command:
+            - curl
+            - -f
+            - http://localhost:80/
+          initialDelaySeconds: 10 # Quandos segundos para aguardar o início das verificações após o start do Pod
+          periodSeconds: 10 # A cada quantos segundos será executado a verificação
+          timeoutSeconds: 5 # Quandos segundos para ocorrer um timeout na porta definida para verificação
+          failureThreshold: 3 # Quantas falhas consecutivas como limite/limiar/trigger para a Probe considerar o Pod como não saudável
+          successThreshold: 1 # Quantos sucesso para considerar que esta tudo OK
+        startupProbe:
+          tcpSocket:
+            port: 81 # Porta que será realizada a verificação pela Probe
+          initialDelaySeconds: 10 # Quandos segundos para aguardar o início das verificações após o start do Pod
+          timeoutSeconds: 5 # Quandos segundos para ocorrer um timeout na porta definida para verificação
+          failureThreshold: 3 # Quantas falhas consecutivas como limite/limiar/trigger para a Probe considerar o Pod como não saudável
+          successThreshold: 1 # Quantos sucesso para considerar que esta tudo OK
